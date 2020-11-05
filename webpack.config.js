@@ -60,6 +60,12 @@ const clientEntrypoints = [
     filename: 'sidebar-about-page',
     template: './src/client/sidebar-about-page/index.html',
   },
+  {
+    name: 'CLIENT - Screen App',
+    entry: './src/client/screen-app/index.js',
+    filename: 'screen-app',
+    template: './src/client/screen-app/index.html',
+  },
 ];
 
 // define certificate locations

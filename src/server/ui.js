@@ -1,9 +1,9 @@
 export const onOpen = () => {
   const menu = SpreadsheetApp.getUi()
-    .createMenu('My Sample React Project') // edit me!
-    .addItem('Sheet Editor', 'openDialog')
-    .addItem('Sheet Editor (Bootstrap)', 'openDialogBootstrap')
-    .addItem('About me', 'openAboutSidebar');
+    .createMenu('Screen App') // edit me!
+    .addItem('Open', 'openScreenApp')
+    .addItem('Sheet Editor', 'openDialog');
+  // .addItem('Sheet Editor (Bootstrap)', 'openDialogBootstrap');
 
   menu.addToUi();
 };
@@ -20,6 +20,11 @@ export const openDialogBootstrap = () => {
     .setWidth(600)
     .setHeight(600);
   SpreadsheetApp.getUi().showModalDialog(html, 'Sheet Editor (Bootstrap)');
+};
+
+export const openScreenApp = () => {
+  const html = HtmlService.createHtmlOutputFromFile('screen-app');
+  SpreadsheetApp.getUi().showSidebar(html);
 };
 
 export const openAboutSidebar = () => {

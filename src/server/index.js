@@ -10,3 +10,23 @@ global.getSheetsData = publicSheetFunctions.getSheetsData;
 global.addSheet = publicSheetFunctions.addSheet;
 global.deleteSheet = publicSheetFunctions.deleteSheet;
 global.setActiveSheet = publicSheetFunctions.setActiveSheet;
+global.openScreenApp = publicUiFunctions.openScreenApp;
+
+// global.CacheService = CacheService;
+// global.cache = CacheService.getScriptCache();
+
+global.getCache = args => {
+  const cache = CacheService.getScriptCache();
+  const response = cache.get(args);
+  return response;
+};
+
+global.putCache = args => {
+  try {
+    const cache = CacheService.getScriptCache();
+    cache.putAll(args, 30);
+    return { status: 'success' };
+  } catch (error) {
+    return error;
+  }
+};
