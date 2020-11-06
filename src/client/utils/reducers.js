@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/prefer-default-export
-export const reduceCallOrMessageData = (arr, { id, statusDescriptor }) =>
+export const formatCallOrMessageData = (arr, { id, statusDescriptor }) =>
   arr
     .sort((a, b) => b.Timestamp - a.Timestamp)
     .reduce((reducedList, item) => {

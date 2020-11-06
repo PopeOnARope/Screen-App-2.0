@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import server from '../../utils/server';
 import { getCandidateHistory } from '../../utils/connectors';
+import { useGlobalStore } from './Provider';
 
 const { serverFunctions } = server;
 
@@ -19,14 +20,10 @@ const MessageHistory = ({ candidateHistory }) => {
   );
 };
 
-const MessageHistoryWithData = ({
-  authId,
-  candidateNumber,
-  candidateEmail,
-}) => {
+const MessageHistoryWithData = ({ candidateNumber, candidateEmail }) => {
   // TODO: ADD ERROR HANDLING AND LOAD
   const [candidateHistory, setCandidateHistory] = useState([]);
-  serverFunctions.putCache('foo', 'bar', 1500);
+  const { authId } = useGlobalStore().state;
 
   const updateComponent = () =>
     getCandidateHistory({

@@ -1,48 +1,71 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import styled from 'styled-components';
 import MessageHistory from './MessageHistory';
-import { getCandidateHistory } from '../../utils/connectors';
-import server from '../../utils/server';
-
-const { serverFunctions } = server;
-
-const CANDIDATE_NUMBER = '12345';
+import Welcome from './Welcome';
+import Verify from './Verify';
+import { fetchAuthId } from '../../utils/connectors';
+import Provider, { useGlobalStore } from './Provider';
 
 const CANDIDATE_DATA = {
   'Candidate #': '12345',
   Email: 'jason@gmail.com',
 };
 
-/*  
-
-Higher order component that manages which view is rendered based on the application state.
-* needs to be able to -
-* 1. when the application loads -
-    -get selected row from spread sheet.
-    -if no row is selected, display <NoCandidateSelected/>
-    -if a row is selected, query the message history and call history for the candidate,
-    -splice the two together
-    -and display the messages component
-  2. When the user selects a candidate
-    -query the user's message/call history and display
-      -if request fails, get a new auth token from big parser
-
-* */
-
-// This component will handle switching out the different main components of the app.
+const ContainerContainer = styled.div`
+  padding: auto 12px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  font-family: Nunito;
+  h1 {
+    color: ${props => props.theme.primary};
+    margin-bottom: 109px;
+  }
+  p {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+  }
+  .lower-content {
+    margin-top: 100px;
+  }
+`;
 
 const Container = props => {
   // TODO find a clean way to listen for changes in the sheet
-  return (
-    <div>
-      <h1>Container</h1>
 
-      <MessageHistory
-        authId={props.authId}
-        candidateNumber={CANDIDATE_DATA['Candidate #']}
-        candidateEmail={CANDIDATE_DATA.Email}
-      />
-    </div>
+  const { state, dispatch } = useGlobalStore();
+  const { authId, currentView } = state;
+
+  React.useEffect(() => {
+    if (!authId) {
+      fetchAuthId().then(result => {
+        dispatch({ type: 'authId', value: result.authId });
+      });
+    }
+  }, []);
+
+  return (
+    <ContainerContainer>
+      {currentView === 'welcome' && <Welcome />}
+      {currentView === 'verify' && <Verify />}
+      {currentView === 'history' && (
+        <MessageHistory
+          authId={props.authId}
+          candidateNumber={CANDIDATE_DATA['Candidate #']}
+          candidateEmail={CANDIDATE_DATA.Email}
+        />
+      )}
+    </ContainerContainer>
   );
 };
 
-export default Container;
+const ContainerWithProvider = () => (
+  <Provider>
+    <Container />
+  </Provider>
+);
+
+export default ContainerWithProvider;

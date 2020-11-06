@@ -117,6 +117,17 @@ const clientConfig = {
   },
   module: {
     rules: [
+      {
+        test: /\.svg$/,
+        use: [
+          {
+            loader: 'svg-url-loader',
+            options: {
+              limit: 10000,
+            },
+          },
+        ],
+      },
       // typescript config
       {
         test: /\.tsx?$/,
@@ -271,6 +282,17 @@ const serverConfig = {
   },
   module: {
     rules: [
+      {
+        test: /\.svg$/,
+        use: [
+          {
+            loader: 'svg-url-loader',
+            options: {
+              limit: 10000,
+            },
+          },
+        ],
+      },
       // typescript config
       {
         test: /\.tsx?$/,

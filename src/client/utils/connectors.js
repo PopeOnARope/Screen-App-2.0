@@ -1,6 +1,6 @@
 import server from './server';
 
-import { reduceCallOrMessageData } from './reducers';
+import { formatCallOrMessageData } from './reducers';
 import {
   BASE_BP_LOGIN_URL,
   LOGIN_CREDENTIALS,
@@ -36,7 +36,7 @@ async function fetchHistory({ authId, gridId, candidateNumber }) {
   return response.json();
 }
 
-async function loadMessagesFromCache(MessageId, arr) {
+async function loadEntriesFromCache(MessageId, arr, previousKey) {
   console.log({ cachedMessages: arr });
   console.log({ MessageId });
   const lm = await serverFunctions.getCache(MessageId);
@@ -44,7 +44,7 @@ async function loadMessagesFromCache(MessageId, arr) {
   console.log({ lastMessage });
   if (lastMessage) {
     arr.push(lastMessage);
-    return loadMessagesFromCache(lastMessage['Previous Message Id'], arr);
+    return loadEntriesFromCache(lastMessage[previousKey], arr);
   }
   return arr;
 }
@@ -68,11 +68,11 @@ export async function fetchAndCombineCandidateHistory({
     candidateNumber,
   });
 
-  const formattedCalls = reduceCallOrMessageData(callHistoryResponse.rows, {
+  const formattedCalls = formatCallOrMessageData(callHistoryResponse.rows, {
     id: 'SessionId',
     statusDescriptor: 'Event',
   });
-  const formattedMessages = reduceCallOrMessageData(messagesResponse.rows, {
+  const formattedMessages = formatCallOrMessageData(messagesResponse.rows, {
     id: 'MessageId',
     statusDescriptor: 'Status',
   });
@@ -80,7 +80,7 @@ export async function fetchAndCombineCandidateHistory({
   // grab the last message object and cache the messageId under the candidates email.
   const lastMessageId =
     formattedMessages[formattedMessages.length - 1].MessageId;
-  const lastCallId = formattedMessages[formattedMessages.length - 1].MessageId;
+  const lastCallId = formattedCalls[formattedCalls.length - 1].SessionId;
 
   const combinedSortedHistory = [...formattedMessages, ...formattedCalls]
     .map(callOrMessage => {
@@ -100,8 +100,10 @@ export async function fetchAndCombineCandidateHistory({
   // add the data to the cache
   serverFunctions.putCache({
     ...cacheableHistory,
-    [candidateEmail]: lastMessageId,
+    [candidateEmail]: JSON.stringify({ lastMessageId, lastCallId }),
   });
+  console.log('candidate history fetched and formatted');
+  console.log({ combinedSortedHistory });
 
   return combinedSortedHistory;
 }
@@ -112,17 +114,30 @@ export async function getCandidateHistory({
   candidateEmail,
 }) {
   // Check cache for employees MostRecentMessageId
-  const lastMessageId = await serverFunctions.getCache(candidateEmail);
+  const lastCallAndMessageId = await serverFunctions.getCache(candidateEmail);
 
-  if (lastMessageId) {
+  if (lastCallAndMessageId) {
+    const { lastCallId, lastMessageId } = JSON.parse(lastCallAndMessageId);
     console.log(
       'last message id successfully loaded from cache. Loading last message.'
     );
-    console.log({ lastMessageId });
-    const cachedMessages = loadMessagesFromCache(lastMessageId, []);
-    if (cachedMessages.length) {
-      return cachedMessages;
-    }
+    console.log({ lastMessageId, lastCallId });
+
+    const cachedMessages = loadEntriesFromCache(
+      lastMessageId,
+      [],
+      'Previous Message Id'
+    );
+
+    const cachedCalls = loadEntriesFromCache(
+      lastCallId,
+      [],
+      'PreviousSessionId'
+    );
+    // TODO account for situation where last message id is present but messages are not
+    return [...cachedCalls, cachedMessages].sort(
+      (a, b) => b.Timestamp - a.Timestamp
+    );
   }
   console.log('looks like the cache is empty, querying big parser');
 
