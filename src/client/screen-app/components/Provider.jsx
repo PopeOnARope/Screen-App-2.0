@@ -1,9 +1,5 @@
 import React from 'react';
-import rootReducer, { initialState } from '../reducers';
-
-const GlobalStore = React.createContext(initialState);
-
-export const useGlobalStore = () => React.useContext(GlobalStore);
+import rootReducer, { initialState, GlobalStore } from '../reducers';
 
 const Provider = ({ children }) => {
   const [state, dispatch] = React.useReducer(rootReducer, initialState);

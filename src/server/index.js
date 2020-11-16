@@ -12,9 +12,6 @@ global.deleteSheet = publicSheetFunctions.deleteSheet;
 global.setActiveSheet = publicSheetFunctions.setActiveSheet;
 global.openScreenApp = publicUiFunctions.openScreenApp;
 
-// global.CacheService = CacheService;
-// global.cache = CacheService.getScriptCache();
-
 global.getCache = args => {
   const cache = CacheService.getScriptCache();
   const response = cache.get(args);
@@ -29,4 +26,32 @@ global.putCache = args => {
   } catch (error) {
     return error;
   }
+};
+
+function getHeaders(sheet) {
+  let headings = sheet
+    .getDataRange()
+    .offset(0, 0, 1)
+    .getValues()[0];
+  let headers = [];
+  for (let i = 0; i < headings.length; i++) {
+    let header = headings[i];
+    // headers[header] = i + 1;
+    headers[i] = header;
+  }
+  return headers;
+}
+
+global.getRowOfSelection = () => {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName('Leads');
+  const row = sheet.getActiveRange().getRow();
+
+  const values = sheet.getRange(`A${row}:BI${row}`).getValues();
+  const headers = getHeaders(sheet);
+  const keyValues = values[0].reduce((acc, curr, idx) => {
+    return { ...acc, [headers[idx]]: curr };
+  }, {});
+
+  return { ...keyValues, row };
 };

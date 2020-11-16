@@ -1,8 +1,8 @@
 export const onOpen = () => {
   const menu = SpreadsheetApp.getUi()
     .createMenu('Screen App') // edit me!
-    .addItem('Open', 'openScreenApp')
-    .addItem('Sheet Editor', 'openDialog');
+    .addItem('Open', 'openScreenApp');
+  // .addItem('Sheet Editor', 'openDialog');
   // .addItem('Sheet Editor (Bootstrap)', 'openDialogBootstrap');
 
   menu.addToUi();

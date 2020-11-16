@@ -1,34 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { ThemeProvider } from 'styled-components';
-import { fetchAuthId } from '../utils/connectors';
 import Container from './components/Container';
+import Provider from './components/Provider';
 
 const theme = {
   primary: '#1fa1ec',
   primaryLight: '#4db4ef',
+  primaryLighter: '#C1E2F5',
+  primaryExtraLight: '#EBF1F2',
+  primaryDark: '#0f7ab8',
   grayMedium: '#B1B1B1',
+  error: '#FF0000',
 };
 
-// get the authid for big parser and inject it here.
-const ContainerWithAuthId = () => {
-  // TODO: ADD ERROR HANDLING AND LOAD
-  const [authId, setAuthId] = useState(false);
-
-  const GlobalStore = React.createContext();
-
-  useEffect(() => {
-    fetchAuthId().then(result => {
-      setAuthId(result.authId);
-    });
-  }, []);
-  return authId ? (
-    <ThemeProvider theme={theme}>
-      <Container authId={authId} />
-    </ThemeProvider>
-  ) : (
-    <p>loading...</p>
+const ContainerWithStyles = () => {
+  return (
+    <Provider>
+      <ThemeProvider theme={theme}>
+        <Container />
+      </ThemeProvider>
+    </Provider>
   );
 };
 
-ReactDOM.render(<ContainerWithAuthId />, document.getElementById('index'));
+ReactDOM.render(<ContainerWithStyles />, document.getElementById('index'));

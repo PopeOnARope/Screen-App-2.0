@@ -1,18 +1,45 @@
-import server from './server';
+import server from '../../utils/server';
 
-import { formatCallOrMessageData } from './reducers';
+import { formatCallOrMessageData } from '../../utils/reducers';
 import {
   BASE_BP_LOGIN_URL,
+  BASE_BP_GRID_URL,
   LOGIN_CREDENTIALS,
   MESSAGES_GRID_ID,
   CALL_GRID_ID,
-  buildHistoryQueryBody,
-  buildGridUrl,
-} from './constants';
+} from '../data/constants';
 
 const { serverFunctions } = server;
 
-export async function fetchAuthId() {
+const buildGridUrl = gridId => `${BASE_BP_GRID_URL}/grid/${gridId}/search`;
+
+const buildHistoryQueryBody = ({ candidateNumber }) => ({
+  query: {
+    columnFilter: {
+      filters: [
+        {
+          column: 'Candidate #',
+          operator: 'EQ',
+          keyword: `${candidateNumber}`,
+        },
+      ],
+      filtersJoinOperator: 'AND',
+    },
+    globalColumnFilterJoinOperator: 'OR',
+    sort: {
+      age: 'asc',
+    },
+    pagination: {
+      startRow: 1,
+      rowCount: 50,
+    },
+    sendRowIdsInResponse: true,
+    showColumnNamesInResponse: true,
+  },
+});
+
+async function fetchAuthId() {
+  console.info('fetching auth id');
   const response = await fetch(BASE_BP_LOGIN_URL, {
     method: 'POST',
     mode: 'cors',
@@ -21,7 +48,16 @@ export async function fetchAuthId() {
     },
     body: JSON.stringify(LOGIN_CREDENTIALS),
   });
-  return response.json();
+  const a = await response.json();
+  serverFunctions.putCache({ authId: a.authId });
+  return a.authId;
+}
+
+async function getAuthId() {
+  const response = await serverFunctions.getCache('authId');
+
+  if (response) return response;
+  return fetchAuthId();
 }
 
 async function fetchHistory({ authId, gridId, candidateNumber }) {
@@ -37,8 +73,6 @@ async function fetchHistory({ authId, gridId, candidateNumber }) {
 }
 
 async function loadEntriesFromCache(MessageId, arr, previousKey) {
-  console.log({ cachedMessages: arr });
-  console.log({ MessageId });
   const lm = await serverFunctions.getCache(MessageId);
   const lastMessage = JSON.parse(lm);
   console.log({ lastMessage });
@@ -50,10 +84,10 @@ async function loadEntriesFromCache(MessageId, arr, previousKey) {
 }
 
 // TODO implement error handling best practices here
-export async function fetchAndCombineCandidateHistory({
+async function fetchAndCombineCandidateHistory({
   authId,
   candidateNumber,
-  candidateEmail,
+  email,
 }) {
   // fetch users message history
   const messagesResponse = await fetchHistory({
@@ -79,8 +113,11 @@ export async function fetchAndCombineCandidateHistory({
 
   // grab the last message object and cache the messageId under the candidates email.
   const lastMessageId =
+    formattedMessages.length &&
     formattedMessages[formattedMessages.length - 1].MessageId;
-  const lastCallId = formattedCalls[formattedCalls.length - 1].SessionId;
+  const lastCallId =
+    formattedCalls.length &&
+    formattedCalls[formattedCalls.length - 1].SessionId;
 
   const combinedSortedHistory = [...formattedMessages, ...formattedCalls]
     .map(callOrMessage => {
@@ -98,9 +135,11 @@ export async function fetchAndCombineCandidateHistory({
   }, {});
 
   // add the data to the cache
+
+  console.log({ cacheableHistory });
   serverFunctions.putCache({
     ...cacheableHistory,
-    [candidateEmail]: JSON.stringify({ lastMessageId, lastCallId }),
+    [email]: JSON.stringify({ lastMessageId, lastCallId }),
   });
   console.log('candidate history fetched and formatted');
   console.log({ combinedSortedHistory });
@@ -108,13 +147,12 @@ export async function fetchAndCombineCandidateHistory({
   return combinedSortedHistory;
 }
 
-export async function getCandidateHistory({
-  authId,
-  candidateNumber,
-  candidateEmail,
-}) {
+async function getCandidateHistory({ authId, email, candidateNumber }) {
+  // check for an authId
+  console.log({ authId, candidateNumber, email });
+
   // Check cache for employees MostRecentMessageId
-  const lastCallAndMessageId = await serverFunctions.getCache(candidateEmail);
+  const lastCallAndMessageId = await serverFunctions.getCache(email);
 
   if (lastCallAndMessageId) {
     const { lastCallId, lastMessageId } = JSON.parse(lastCallAndMessageId);
@@ -123,27 +161,35 @@ export async function getCandidateHistory({
     );
     console.log({ lastMessageId, lastCallId });
 
-    const cachedMessages = loadEntriesFromCache(
+    const cachedMessages = await loadEntriesFromCache(
       lastMessageId,
       [],
       'Previous Message Id'
     );
 
-    const cachedCalls = loadEntriesFromCache(
+    const cachedCalls = await loadEntriesFromCache(
       lastCallId,
       [],
       'PreviousSessionId'
     );
     // TODO account for situation where last message id is present but messages are not
-    return [...cachedCalls, cachedMessages].sort(
-      (a, b) => b.Timestamp - a.Timestamp
-    );
+    if (cachedMessages || cachedCalls) {
+      const cachedHistory = await [...cachedCalls, ...cachedMessages].sort(
+        (a, b) => b.Timestamp - a.Timestamp
+      );
+      return cachedHistory;
+    }
   }
   console.log('looks like the cache is empty, querying big parser');
 
   return fetchAndCombineCandidateHistory({
     authId,
     candidateNumber,
-    candidateEmail,
+    email,
   });
 }
+
+export default {
+  getCandidateHistory,
+  getAuthId,
+};
