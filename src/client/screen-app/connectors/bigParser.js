@@ -27,7 +27,7 @@ const buildHistoryQueryBody = ({ candidateNumber }) => ({
     },
     globalColumnFilterJoinOperator: 'OR',
     sort: {
-      age: 'asc',
+      Timestamp: 'desc',
     },
     pagination: {
       startRow: 1,
@@ -49,7 +49,7 @@ async function fetchAuthId() {
     body: JSON.stringify(LOGIN_CREDENTIALS),
   });
   const a = await response.json();
-  serverFunctions.putCache({ authId: a.authId });
+  serverFunctions.putCache('authId', a.authId);
   return a.authId;
 }
 
@@ -69,18 +69,9 @@ async function fetchHistory({ authId, gridId, candidateNumber }) {
     },
     body: JSON.stringify(buildHistoryQueryBody({ candidateNumber, gridId })),
   });
-  return response.json();
-}
+  const history = response.json();
 
-async function loadEntriesFromCache(MessageId, arr, previousKey) {
-  const lm = await serverFunctions.getCache(MessageId);
-  const lastMessage = JSON.parse(lm);
-  console.log({ lastMessage });
-  if (lastMessage) {
-    arr.push(lastMessage);
-    return loadEntriesFromCache(lastMessage[previousKey], arr);
-  }
-  return arr;
+  return history;
 }
 
 // TODO implement error handling best practices here
@@ -111,76 +102,22 @@ async function fetchAndCombineCandidateHistory({
     statusDescriptor: 'Status',
   });
 
-  // grab the last message object and cache the messageId under the candidates email.
-  const lastMessageId =
-    formattedMessages.length &&
-    formattedMessages[formattedMessages.length - 1].MessageId;
-  const lastCallId =
-    formattedCalls.length &&
-    formattedCalls[formattedCalls.length - 1].SessionId;
-
   const combinedSortedHistory = [...formattedMessages, ...formattedCalls]
     .map(callOrMessage => {
       const Timestamp = new Date(callOrMessage.Timestamp);
       return { ...callOrMessage, Timestamp };
     })
-    .sort((a, b) => b.Timestamp - a.Timestamp);
+    .sort((a, b) => a.Timestamp - b.Timestamp);
 
-  // format data for cache
-  const cacheableHistory = combinedSortedHistory.reduce((acc, cv, idx, arr) => {
-    const newKeyValuePair = cv.MessageId
-      ? { [cv.MessageId]: JSON.stringify(cv) }
-      : { [cv.SessionId]: JSON.stringify(cv) };
-    return { ...acc, ...newKeyValuePair };
-  }, {});
-
-  // add the data to the cache
-
-  console.log({ cacheableHistory });
-  serverFunctions.putCache({
-    ...cacheableHistory,
-    [email]: JSON.stringify({ lastMessageId, lastCallId }),
-  });
-  console.log('candidate history fetched and formatted');
-  console.log({ combinedSortedHistory });
+  serverFunctions.putCache(email, JSON.stringify(combinedSortedHistory));
 
   return combinedSortedHistory;
 }
 
 async function getCandidateHistory({ authId, email, candidateNumber }) {
-  // check for an authId
-  console.log({ authId, candidateNumber, email });
+  const cachedHistory = await serverFunctions.getCache(email);
 
-  // Check cache for employees MostRecentMessageId
-  const lastCallAndMessageId = await serverFunctions.getCache(email);
-
-  if (lastCallAndMessageId) {
-    const { lastCallId, lastMessageId } = JSON.parse(lastCallAndMessageId);
-    console.log(
-      'last message id successfully loaded from cache. Loading last message.'
-    );
-    console.log({ lastMessageId, lastCallId });
-
-    const cachedMessages = await loadEntriesFromCache(
-      lastMessageId,
-      [],
-      'Previous Message Id'
-    );
-
-    const cachedCalls = await loadEntriesFromCache(
-      lastCallId,
-      [],
-      'PreviousSessionId'
-    );
-    // TODO account for situation where last message id is present but messages are not
-    if (cachedMessages || cachedCalls) {
-      const cachedHistory = await [...cachedCalls, ...cachedMessages].sort(
-        (a, b) => b.Timestamp - a.Timestamp
-      );
-      return cachedHistory;
-    }
-  }
-  console.log('looks like the cache is empty, querying big parser');
+  if (cachedHistory) return JSON.parse(cachedHistory);
 
   return fetchAndCombineCandidateHistory({
     authId,

@@ -13,10 +13,12 @@ export const LOGIN_CREDENTIALS = {
   loggedIn: true,
 };
 
-export const MESSAGES_GRID_ID = '5fa1a37594a030055fadfbb7';
-export const CALL_GRID_ID = '5fa1aa5694a030055fadfbfb';
+export const MESSAGES_GRID_ID = '5fb3281d94a0300582b14f8c';
+export const CALL_GRID_ID = '5f9c256394a030055fadef15';
 
-export const CANDIDATE_DATA = {
-  'Candidate #': '12345',
-  Email: 'jason@gmail.com',
-};
+export const SEND_MESSAGE_URL =
+  'https://api.chasebox.com/screen-qa/message/send';
+export const START_CONFERENCE_URL = 'https://api.chasebox.com/screen-qa/start';
+export const KICK_URL = 'https://api.chasebox.com/screen-qa/kick';
+export const ENTER_SCREENER_URL = 'https://api.chasebox.com/screen-qa/enter';
+export const EXIT_SCREENER_URL = 'https://api.chasebox.com/screen-qa/exit';

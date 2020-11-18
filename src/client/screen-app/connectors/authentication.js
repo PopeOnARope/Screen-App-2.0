@@ -10,18 +10,18 @@ const baseRequestProperties = {
   },
 };
 
-async function createAccount({ candidateNumber, location }) {
+async function createAccount({ phoneNumber, location }) {
   const response = await fetch(getUrl('create'), {
     ...baseRequestProperties,
-    body: JSON.stringify({ candidateNumber, location }),
+    body: JSON.stringify({ phoneNumber, location }),
   });
   return response;
 }
 
-async function verifyAccount({ candidateNumber, password }) {
+async function verifyAccount({ phoneNumber, password }) {
   const response = await fetch(getUrl('verify'), {
     ...baseRequestProperties,
-    body: JSON.stringify({ candidateNumber, password }),
+    body: JSON.stringify({ phoneNumber, password }),
   });
   return response;
 }
