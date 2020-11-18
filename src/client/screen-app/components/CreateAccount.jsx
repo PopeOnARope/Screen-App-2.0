@@ -14,7 +14,7 @@ const VerifyContainer = styled.div`
   h1 {
     margin-bottom: 12px;
     text-align: center;
-    font-size: 22px;
+    font-size: ${props => props.theme.large}px;
   }
   p {
     text-align: left;
@@ -31,7 +31,7 @@ const Button = styled.button`
   border: none;
   font-style: normal;
   font-weight: bold;
-  font-size: 24px;
+  font-size: ${props => props.theme.xlarge}px;
   line-height: 33px;
   font-family: Nunito;
   &:hover {
@@ -84,13 +84,13 @@ const getCountryByName = n => {
 const CreateAccount = () => {
   //   const { dispatch } = useGlobalStore();
   const { dispatch } = useGlobalStore();
-  const [candidateNumber, setcandidateNumber] = React.useState('');
+  const [phoneNumber, setPhoneNumber] = React.useState('');
   const [country, setCountry] = React.useState(
     getCountryByName('United States')
   );
 
   const handlecandidateNumberChange = ({ target: { value } }) => {
-    setcandidateNumber(normalizeInput(value, candidateNumber));
+    setPhoneNumber(normalizeInput(value, phoneNumber));
   };
 
   const handleCountryChange = ({ target: { value } }) => {
@@ -101,19 +101,18 @@ const CreateAccount = () => {
     // strip all of the () and + etc from the phone number
     const unformattedNumber = `${reduceToNumbers(
       country.dial_code
-    )}${reduceToNumbers(candidateNumber)}`;
-    console.log({ unformattedNumber });
-    dispatch({ type: 'usercandidateNumber', value: unformattedNumber });
+    )}${reduceToNumbers(phoneNumber)}`;
+    dispatch({ type: 'userPhoneNumber', value: unformattedNumber });
 
     createAccount({
-      candidateNumber: unformattedNumber,
+      phoneNumber: unformattedNumber,
       location: country.code,
     }).then(dispatch({ type: 'currentView', value: 'codeInput' }));
   }
 
   return (
     <VerifyContainer>
-      <h1>CreateAccount your Phone Number</h1>
+      <h1>Enter your Phone Number</h1>
       <p>
         Screen will send you an SMS message to verify your phone number. Enter
         your country code and phone number:
@@ -129,7 +128,7 @@ const CreateAccount = () => {
         <CountryCodeInput value={country.dail_code}>
           {country.dial_code}
         </CountryCodeInput>
-        <Input onChange={handlecandidateNumberChange} value={candidateNumber} />
+        <Input onChange={handlecandidateNumberChange} value={phoneNumber} />
       </FormElementContainer>
       <Button
         onClick={() => {

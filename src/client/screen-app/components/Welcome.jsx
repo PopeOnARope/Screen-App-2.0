@@ -8,6 +8,7 @@ import { sharedButtonStyles, sharedContainerStyles } from '../styles';
 
 const WelcomeContainer = styled.div`
   ${sharedContainerStyles}
+  padding: ${props => props.theme.xsmall}px;
 `;
 
 const Button = styled.button`

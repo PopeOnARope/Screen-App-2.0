@@ -14,7 +14,7 @@ export const sharedContainerStyles = css`
   p {
     font-style: normal;
     font-weight: 600;
-    font-size: 14px;
+    font-size: ${props => props.theme.xsmall}px;
     text-align: center;
   }
   .lower-content {
@@ -41,7 +41,7 @@ export const sharedInputStyles = css`
   font-family: Nunito;
   font-style: normal;
   font-weight: 600;
-  font-size: 20px;
+  font-size: ${props => props.theme.medium}px;
   line-height: 27px;
   letter-spacing: -0.24px;
   &:focus {
@@ -62,7 +62,7 @@ export const sharedButtonStyles = css`
   border: none;
   font-style: normal;
   font-weight: bold;
-  font-size: 24px;
+  font-size: ${props => props.theme.xlarge}px;
   line-height: 33px;
   font-family: Nunito;
   &:hover {

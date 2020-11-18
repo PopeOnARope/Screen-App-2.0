@@ -17,7 +17,7 @@ const CodeInputContainer = styled.div`
   h1 {
     margin-bottom: 12px;
     text-align: center;
-    font-size: 20px;
+    font-size: ${props => props.theme.medium}px;
   }
   p {
     text-align: left;
@@ -71,12 +71,12 @@ const CodeInput = () => {
 
   async function handleSubmit() {
     verifyAccount({
-      candidateNumber: state.usercandidateNumber,
+      phoneNumber: state.userPhoneNumber,
       password,
     })
+      .then(r => r.json())
       .then(r => {
-        console.log({ r });
-        dispatch({ type: 'currentView', value: 'chatWindow' });
+        dispatch({ type: 'screeners', value: r.screeners });
       })
       .catch(err => {
         setPassword('');
