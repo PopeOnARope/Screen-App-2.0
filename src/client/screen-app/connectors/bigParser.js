@@ -13,7 +13,7 @@ const { serverFunctions } = server;
 
 const buildGridUrl = gridId => `${BASE_BP_GRID_URL}/grid/${gridId}/search`;
 
-const buildHistoryQueryBody = ({ candidateNumber }) => ({
+const buildHistoryQueryBody = ({ candidateNumber, startRow, rowCount }) => ({
   query: {
     columnFilter: {
       filters: [
@@ -30,8 +30,8 @@ const buildHistoryQueryBody = ({ candidateNumber }) => ({
       Timestamp: 'desc',
     },
     pagination: {
-      startRow: 1,
-      rowCount: 50,
+      startRow: startRow || 1,
+      rowCount: rowCount || 50,
     },
     sendRowIdsInResponse: true,
     showColumnNamesInResponse: true,
@@ -50,6 +50,7 @@ async function fetchAuthId() {
   });
   const a = await response.json();
   serverFunctions.putCache('authId', a.authId);
+  console.log({ authId: a.authId });
   return a.authId;
 }
 
@@ -60,14 +61,22 @@ async function getAuthId() {
   return fetchAuthId();
 }
 
-async function fetchHistory({ authId, gridId, candidateNumber }) {
+async function fetchHistory({
+  authId,
+  gridId,
+  candidateNumber,
+  startRow,
+  rowCount,
+}) {
   const response = await fetch(buildGridUrl(gridId), {
     method: 'POST',
     headers: {
       authId,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(buildHistoryQueryBody({ candidateNumber, gridId })),
+    body: JSON.stringify(
+      buildHistoryQueryBody({ candidateNumber, startRow, rowCount })
+    ),
   });
   const history = response.json();
 
@@ -78,19 +87,24 @@ async function fetchHistory({ authId, gridId, candidateNumber }) {
 async function fetchAndCombineCandidateHistory({
   authId,
   candidateNumber,
-  email,
+  startRow,
+  rowCount,
 }) {
   // fetch users message history
   const messagesResponse = await fetchHistory({
     authId,
     gridId: MESSAGES_GRID_ID,
     candidateNumber,
+    startRow,
+    rowCount,
   });
 
   const callHistoryResponse = await fetchHistory({
     authId,
     gridId: CALL_GRID_ID,
     candidateNumber,
+    startRow,
+    rowCount,
   });
 
   const formattedCalls = formatCallOrMessageData(callHistoryResponse.rows, {
@@ -109,24 +123,37 @@ async function fetchAndCombineCandidateHistory({
     })
     .sort((a, b) => a.Timestamp - b.Timestamp);
 
+  return combinedSortedHistory;
+}
+
+async function getCandidateHistory({
+  authId,
+  email,
+  candidateNumber,
+  startRow,
+}) {
+  // check the cache
+  const cachedHistory = await serverFunctions.getCache(email);
+  console.log({ cachedHistory });
+  // why is an empty object sometimes getting cached?
+  if (cachedHistory && cachedHistory.length > 5)
+    return JSON.parse(cachedHistory);
+
+  // if cache is empty, fetch history
+  const combinedSortedHistory = await fetchAndCombineCandidateHistory({
+    authId,
+    candidateNumber,
+    email,
+    startRow,
+  });
+  // cache the fetched history
   serverFunctions.putCache(email, JSON.stringify(combinedSortedHistory));
 
   return combinedSortedHistory;
 }
 
-async function getCandidateHistory({ authId, email, candidateNumber }) {
-  const cachedHistory = await serverFunctions.getCache(email);
-
-  if (cachedHistory) return JSON.parse(cachedHistory);
-
-  return fetchAndCombineCandidateHistory({
-    authId,
-    candidateNumber,
-    email,
-  });
-}
-
 export default {
   getCandidateHistory,
   getAuthId,
+  fetchAndCombineCandidateHistory,
 };

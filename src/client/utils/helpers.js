@@ -13,3 +13,9 @@ export const reduceToNumbers = number => {
     return acc;
   }, '');
 };
+
+export const getMostRecentMessage = arr =>
+  [...arr].reverse().find(m => m.Direction === 'inbound');
+
+export const getMostRecentMessageId = arr =>
+  getMostRecentMessage(arr).MessageId || getMostRecentMessage(arr).SessionId;

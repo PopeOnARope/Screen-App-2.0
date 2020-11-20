@@ -22,7 +22,6 @@ const getRequestBody = ({
     message,
   }),
   method: 'POST',
-  mode: 'no-cors',
   headers: {
     'Content-Type': 'application/json',
     auth: screenerAuth,

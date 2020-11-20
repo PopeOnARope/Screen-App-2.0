@@ -2,6 +2,7 @@ import React from 'react';
 // import WelcomeIcon from '../../../assets/welcomeIcon.png';
 import styled, { css } from 'styled-components';
 import { useGlobalStore } from '../reducers';
+import Icon from 'react-eva-icons';
 
 import { sharedContainerStyles, sharedInputStyles } from '../styles';
 import { countryCodes } from '../data/countryCodes';
@@ -135,7 +136,7 @@ const CreateAccount = () => {
           handleSubmit();
         }}
       >
-        Continue
+        <Icon name={'arrow-right'} size={'large'} />
       </Button>
     </VerifyContainer>
   );

@@ -12,8 +12,10 @@ const theme = {
   primaryExtraLight: '#EBF1F2',
   primaryDark: '#0f7ab8',
   grayMedium: '#B1B1B1',
+  grayDark: '#dadada',
   error: '#FF0000',
   // fonts
+  xxsmall: `${0.8 * 5}`,
   xsmall: `${0.8 * 14}`,
   small: `${0.8 * 16}`,
   medium: `${0.8 * 20}`,

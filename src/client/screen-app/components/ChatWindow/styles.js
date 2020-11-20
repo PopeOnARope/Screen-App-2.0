@@ -42,6 +42,7 @@ export const MessageWindowContainer = styled.div`
     flex-grow: 4;
   }
   .message-list {
+    font-weight: normal;
     margin-top: 68px;
     margin-bottom: 48px;
     .rce-mbox {
@@ -51,13 +52,23 @@ export const MessageWindowContainer = styled.div`
       svg {
         filter: none;
       }
+      .rce-mbox-time {
+        font-size: 9px;
+      }
     }
+    //outgoing message styles
     .rce-mbox-right {
       margin-left: 35px;
       margin-right: 25px;
       background: ${props => props.theme.primaryLighter};
+      // message tail
       svg {
         fill: ${props => props.theme.primaryLighter};
+        filter: none;
+      }
+      // message status  checks
+      .rce-mbox-time.non-copiable > span > svg {
+        fill: ${props => props.theme.primary};
       }
     }
   }
@@ -68,10 +79,14 @@ export const MessageListContainer = styled.div`
   flex-grow: 4;
 `;
 
-export const NavbarMiddleContainer = styled.div`
+export const NavbarLeftContainer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  p {
+    font-size: 9px;
+    text-align: left;
+  }
 `;
 
 export const Navbar = styled.div`
@@ -79,7 +94,7 @@ export const Navbar = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-around;
-  padding: 10px 10px 3px 10px;
+  padding: 3px 10px 3px 10px;
   height: 48px;
   position: fixed;
   z-index: 2;

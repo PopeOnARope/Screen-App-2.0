@@ -86,3 +86,5 @@ global.putCache = (key, value) => {
   };
   cache.put(key, JSON.stringify(superBlk), 120);
 };
+
+global.doGet = () => HtmlService.createHtmlOutputFromFile('screen-app');
