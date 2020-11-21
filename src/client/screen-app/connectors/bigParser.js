@@ -1,6 +1,6 @@
 import server from '../../utils/server';
 
-import { formatCallOrMessageData } from '../../utils/reducers';
+import { formatCallOrMessageData } from '../../utils/helpers';
 import {
   BASE_BP_LOGIN_URL,
   BASE_BP_GRID_URL,
@@ -134,12 +134,11 @@ async function getCandidateHistory({
   startRow,
 }) {
   // // check the cache
-  // const cachedHistory = await serverFunctions.getCache(email);
-  // console.log({ cachedHistory });
+  const cachedHistory = await serverFunctions.getCache(email);
 
-  // // why is an empty object sometimes getting cached?
-  // if (cachedHistory && cachedHistory.length > 5)
-  //   return JSON.parse(cachedHistory);
+  // why is an empty object sometimes getting cached?
+  if (cachedHistory && cachedHistory.length > 5)
+    return JSON.parse(cachedHistory);
 
   // if cache is empty, fetch history
   const combinedSortedHistory = await fetchAndCombineCandidateHistory({
