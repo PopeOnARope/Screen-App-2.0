@@ -31,7 +31,7 @@ const buildHistoryQueryBody = ({ candidateNumber, startRow, rowCount }) => ({
     },
     pagination: {
       startRow: startRow || 1,
-      rowCount: rowCount || 50,
+      rowCount: rowCount || 10,
     },
     sendRowIdsInResponse: true,
     showColumnNamesInResponse: true,
@@ -116,12 +116,13 @@ async function fetchAndCombineCandidateHistory({
     statusDescriptor: 'Status',
   });
 
-  const combinedSortedHistory = [...formattedMessages, ...formattedCalls]
-    .map(callOrMessage => {
-      const Timestamp = new Date(callOrMessage.Timestamp);
-      return { ...callOrMessage, Timestamp };
-    })
-    .sort((a, b) => a.Timestamp - b.Timestamp);
+  const combinedSortedHistory =
+    formattedMessages.length && formattedCalls.length
+      ? [...formattedMessages, ...formattedCalls].map(callOrMessage => {
+          const Timestamp = new Date(callOrMessage.Timestamp);
+          return { ...callOrMessage, Timestamp };
+        })
+      : [];
 
   return combinedSortedHistory;
 }
@@ -132,12 +133,13 @@ async function getCandidateHistory({
   candidateNumber,
   startRow,
 }) {
-  // check the cache
-  const cachedHistory = await serverFunctions.getCache(email);
-  console.log({ cachedHistory });
-  // why is an empty object sometimes getting cached?
-  if (cachedHistory && cachedHistory.length > 5)
-    return JSON.parse(cachedHistory);
+  // // check the cache
+  // const cachedHistory = await serverFunctions.getCache(email);
+  // console.log({ cachedHistory });
+
+  // // why is an empty object sometimes getting cached?
+  // if (cachedHistory && cachedHistory.length > 5)
+  //   return JSON.parse(cachedHistory);
 
   // if cache is empty, fetch history
   const combinedSortedHistory = await fetchAndCombineCandidateHistory({

@@ -12,6 +12,20 @@ global.deleteSheet = publicSheetFunctions.deleteSheet;
 global.setActiveSheet = publicSheetFunctions.setActiveSheet;
 global.openScreenApp = publicUiFunctions.openScreenApp;
 
+// returns an array of a sheets headers where the index o
+function getHeaders(sheet) {
+  let headings = sheet
+    .getDataRange()
+    .offset(0, 0, 1)
+    .getValues()[0];
+  let headers = [];
+  for (let i = 0; i < headings.length; i++) {
+    let header = headings[i];
+    // headers[header] = i + 1;
+    headers[i] = header;
+  }
+  return headers;
+}
 global.getRowOfSelection = () => {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName('Leads');
@@ -32,20 +46,6 @@ global.getRowOfSelection = () => {
   return { ...selectKeyValues, row };
 };
 
-// returns an array of a sheets headers where the index o
-function getHeaders(sheet) {
-  let headings = sheet
-    .getDataRange()
-    .offset(0, 0, 1)
-    .getValues()[0];
-  let headers = [];
-  for (let i = 0; i < headings.length; i++) {
-    let header = headings[i];
-    // headers[header] = i + 1;
-    headers[i] = header;
-  }
-  return headers;
-}
 /* eslint-disable*/
 global.getCache = key => {
   const cache = CacheService.getScriptCache();

@@ -109,3 +109,25 @@ export const InputContainer = styled.div`
   width: 100%;
   border-top: 1px solid ${props => props.theme.grayMedium};
 `;
+
+export const CallBox = styled.div`
+  background: ${props => props.theme.grayDark};
+  border-radius: 5px;
+  width: max-content;
+  align-items: center;
+  margin: 8px auto;
+  padding: 8px;
+  p {
+    display: flex;
+    color: #222;
+    i {
+      margin-right: 5px;
+    }
+  }
+`;
+export const LoadMoreButton = styled.button`
+  border: none;
+  color: ${props => props.theme.primary};
+  width: 100%;
+  cursor: pointer;
+`;

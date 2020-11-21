@@ -18,4 +18,6 @@ export const getMostRecentMessage = arr =>
   [...arr].reverse().find(m => m.Direction === 'inbound');
 
 export const getMostRecentMessageId = arr =>
-  getMostRecentMessage(arr).MessageId || getMostRecentMessage(arr).SessionId;
+  (getMostRecentMessage(arr) && getMostRecentMessage(arr).MessageId) ||
+  (getMostRecentMessage(arr) && getMostRecentMessage(arr).SessionId) ||
+  null;

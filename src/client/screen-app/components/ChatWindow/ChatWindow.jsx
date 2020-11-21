@@ -7,6 +7,8 @@ import Icon from 'react-eva-icons';
 import Conference from '../Conference';
 import { callStatusKeys } from '../../data/constants';
 import PollingManager from './PollingManager';
+import server from '../../../utils/server';
+
 import {
   Button,
   MessageListContainer,
@@ -14,10 +16,13 @@ import {
   NavbarLeftContainer,
   Navbar,
   InputContainer,
+  LoadMoreButton,
 } from './styles';
 
-import { sendMessage } from '../../connectors';
+import { sendMessage, fetchAndCombineCandidateHistory } from '../../connectors';
 import { useGlobalStore } from '../../reducers';
+
+const { serverFunctions } = server;
 
 const NavbarLeft = ({ name, history }) => {
   const lastIncomingMessage = [...history]
@@ -73,7 +78,7 @@ const ChatWindow = () => {
     messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const { _id, screenerAuth, selectedCandidate } = state;
+  const { _id, screenerAuth, selectedCandidate, authId } = state;
 
   const { name, candidateNumber } = selectedCandidate || {};
 
@@ -110,23 +115,45 @@ const ChatWindow = () => {
     setMessage('');
   }
 
-  useEffect(scrollToBottom, [selectedCandidate]);
+  async function loadOlderMessages() {
+    const startRow = selectedCandidate.startRow + 10 || 11;
+    const history = await fetchAndCombineCandidateHistory({
+      authId,
+      candidateNumber,
+      startRow,
+      rowCount: 10,
+    });
+    serverFunctions.putCache(selectedCandidate.email, [
+      ...selectedCandidate.history,
+      ...history,
+    ]);
+    dispatch({
+      type: 'selectedCandidate',
+      value: {
+        ...selectedCandidate,
+        history: [...selectedCandidate.history, ...history],
+        startRow,
+      },
+    });
+  }
+
+  useEffect(scrollToBottom, [selectedCandidate.email]);
 
   return (
     <MessageWindowContainer>
       <Navbar>
         <NavbarLeft {...selectedCandidate} />
-        {/* <Conference /> */}
+        <Conference />
       </Navbar>
       <MessageListContainer>
         <div className="message-list">
-          <button>load more</button>
+          <LoadMoreButton onClick={loadOlderMessages}>load more</LoadMoreButton>
           {selectedCandidate.history &&
             selectedCandidate.history.map(
               ({ Timestamp, Message, Direction, Status, SessionId }, idx) => {
-                if (SessionId) {
+                if (SessionId && Status) {
                   return (
-                    <CallBox>
+                    <CallBox key={idx}>
                       <p>
                         <Icon
                           name={callStatusKeys[Status].iconName}

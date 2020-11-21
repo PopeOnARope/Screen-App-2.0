@@ -49,4 +49,10 @@ export const callStatusKeys = {
     fill: 'red',
     showTime: true,
   },
+  'conference-end': {
+    title: 'Ended',
+    iconName: 'phone',
+    fill: 'red',
+    showTime: true,
+  },
 };
