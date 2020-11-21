@@ -75,7 +75,7 @@ const ChatWindow = () => {
 
   const { _id, screenerAuth, selectedCandidate } = state;
 
-  const { name, candidateNumber, email } = selectedCandidate || {};
+  const { name, candidateNumber } = selectedCandidate || {};
 
   async function sendMessageAndUpdate() {
     // payload to send to api
@@ -97,7 +97,7 @@ const ChatWindow = () => {
       Status: 'sent',
       fakeId,
     };
-    console.log({ message });
+
     dispatch({ type: 'sendMessage', value: messageObject });
     sendMessage(payload)
       .then(() => {
@@ -123,12 +123,8 @@ const ChatWindow = () => {
           <button>load more</button>
           {selectedCandidate.history &&
             selectedCandidate.history.map(
-              (
-                { MessageId, Timestamp, Message, Direction, Status, SessionId },
-                idx
-              ) => {
+              ({ Timestamp, Message, Direction, Status, SessionId }, idx) => {
                 if (SessionId) {
-                  //initiated, in-progress, completed
                   return (
                     <CallBox>
                       <p>
@@ -171,6 +167,7 @@ const ChatWindow = () => {
               e.preventDefault();
               return false;
             }
+            return true;
           }}
           rightButtons={
             <Button

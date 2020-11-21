@@ -15,13 +15,6 @@ const defaultConnectionProps = {
   connected: true,
 };
 
-const ConferenceProps = {
-  leftPhone: defaultPhoneProps,
-  rightPhone: defaultPhoneProps,
-  size: 'small',
-  connection: defaultConnectionProps,
-};
-
 const ConferenceContainer = styled.div`
   display: inline-flex;
   margin-top: 12px;
@@ -68,15 +61,14 @@ const Conference = ({ size }) => {
   const { state } = useGlobalStore();
   const { _id, screenerAuth, selectedCandidate } = state;
   const [leftPhone, setLeftPhone] = React.useState(defaultPhoneProps);
-  // const [rightPhone, setRightPhone] = React.useState(defaultPhoneProps);
-  // const [connection, setConnection] = React.useState(defaultConnectionProps);
+  const [rightPhone, setRightPhone] = React.useState(defaultPhoneProps);
+  const [connection, setConnection] = React.useState(defaultConnectionProps);
   if (!selectedCandidate) {
     return <React.Fragment />;
   }
   const { name, candidateNumber } = selectedCandidate;
 
   const startConferenceAndUpdate = () => {
-    console.log('starting conference');
     startConference({ _id, screenerAuth, name, candidateNumber });
     setLeftPhone({ ...defaultPhoneProps, state: 'call' });
   };

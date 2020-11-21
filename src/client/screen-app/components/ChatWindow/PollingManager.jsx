@@ -35,7 +35,7 @@ const candidateHasLocalMessages = (state, email) =>
 
 const PollingManager = props => {
   const { state, dispatch } = useGlobalStore();
-  const { selectedCandidate, candidateNumber } = state;
+  const { selectedCandidate } = state;
 
   async function pollSelectedCandidate() {
     const authId = state.authId || (await getAuthId());
@@ -56,7 +56,7 @@ const PollingManager = props => {
           authId,
           startRow: 1,
         });
-        console.log({ newCandidateHistory });
+
         dispatch({
           type: 'selectedCandidate',
           value: { ...newCandidate, history: newCandidateHistory },
@@ -69,7 +69,7 @@ const PollingManager = props => {
     }
   }
 
-  async function getRecentMessages() {
+  async function pollRecentMessages() {
     if (state.authId && selectedCandidate) {
       const history = await fetchAndCombineCandidateHistory({
         authId: state.authId,
@@ -94,7 +94,7 @@ const PollingManager = props => {
   }, [selectedCandidate]);
 
   useInterval(() => {
-    getRecentMessages();
+    pollRecentMessages();
   }, 3000);
 
   if (!selectedCandidate || selectedCandidate.name === 'Name') {

@@ -1,55 +1,47 @@
 import React from 'react';
-// import WelcomeIcon from '../../../assets/welcomeIcon.png';
-import styled, { css } from 'styled-components';
-import { useGlobalStore } from '../reducers';
 import Icon from 'react-eva-icons';
+import styled from 'styled-components';
+import { useGlobalStore } from '../reducers';
 
-import { sharedContainerStyles, sharedInputStyles } from '../styles';
+import {
+  sharedContainerStyles,
+  sharedInputStyles,
+  sharedButtonStyles,
+} from '../styles';
 import { countryCodes } from '../data/countryCodes';
 import { createAccount } from '../connectors';
 import { reduceToNumbers } from '../../utils/helpers';
 
 const VerifyContainer = styled.div`
   ${sharedContainerStyles}
-  padding: 7px;
-  h1 {
-    margin-bottom: 12px;
-    text-align: center;
-    font-size: ${props => props.theme.large}px;
-  }
+  padding: 26px;
+
   p {
     text-align: left;
   }
 `;
 
 const Button = styled.button`
-  width: 100%;
-  padding: 2px;
-  background: ${props => props.theme.primary};
-  border-radius: 10px;
-  height: 50px;
-  color: #fff;
-  border: none;
-  font-style: normal;
-  font-weight: bold;
-  font-size: ${props => props.theme.xlarge}px;
-  line-height: 33px;
-  font-family: Nunito;
-  &:hover {
-    background: ${props => props.theme.primaryLight};
-    cursor: pointer;
-  }
+  ${sharedButtonStyles}
+  border-radius: 36px;
+  height: 56px;
+  width: 56px;
 `;
 
 const CountryCodeInput = styled.span`
   ${sharedInputStyles}
   width: 48px;
   padding: 0px;
+  margin-bottom: 36px;
+  display: flex;
+  flex-direction: column-reverse;
 `;
 
 const Input = styled.input`
   ${sharedInputStyles}
+  margin-top: 2px;
   margin-left: 18px;
+  margin-bottom: 36px;
 `;
 
 const Select = styled.select`
@@ -104,6 +96,7 @@ const CreateAccount = () => {
       country.dial_code
     )}${reduceToNumbers(phoneNumber)}`;
     dispatch({ type: 'userPhoneNumber', value: unformattedNumber });
+    dispatch({ type: 'userCountryCode', value: country.code });
 
     createAccount({
       phoneNumber: unformattedNumber,
@@ -113,7 +106,7 @@ const CreateAccount = () => {
 
   return (
     <VerifyContainer>
-      <h1>Enter your Phone Number</h1>
+      <h2>Verify your Phone Number</h2>
       <p>
         Screen will send you an SMS message to verify your phone number. Enter
         your country code and phone number:
@@ -136,7 +129,7 @@ const CreateAccount = () => {
           handleSubmit();
         }}
       >
-        <Icon name={'arrow-right'} size={'large'} />
+        <Icon name={'arrow-forward-outline'} size={'xlarge'} />
       </Button>
     </VerifyContainer>
   );

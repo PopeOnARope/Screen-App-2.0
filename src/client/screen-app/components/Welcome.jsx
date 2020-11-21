@@ -19,7 +19,7 @@ const Welcome = () => {
   const { dispatch } = useGlobalStore();
   return (
     <WelcomeContainer>
-      <h1>Welcome to Screen!</h1>
+      <h1>Welcome to Screen</h1>
       <img src={WelcomeSVG}></img>
       <div className="lower-content">
         <p>

@@ -21,6 +21,7 @@ const theme = {
   medium: `${0.8 * 20}`,
   large: `${0.8 * 22}`,
   xlarge: `${0.8 * 24}`,
+  xxlarge: '29',
 };
 
 const ContainerWithStyles = () => {

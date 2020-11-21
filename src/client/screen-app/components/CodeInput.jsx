@@ -9,22 +9,21 @@ import {
   sharedInputStyles,
   sharedButtonStyles,
 } from '../styles';
-import { verifyAccount } from '../connectors';
+import { verifyAccount, createAccount } from '../connectors';
 
 const CodeInputContainer = styled.div`
   ${sharedContainerStyles}
-  padding: 7px;
-  h1 {
-    margin-bottom: 12px;
-    text-align: center;
-    font-size: ${props => props.theme.medium}px;
-  }
+  padding: 24px;
+
   p {
     text-align: left;
     width: 100%;
   }
   .faded {
     color: ${props => props.theme.grayMedium};
+  }
+  h2 {
+    margin-bottom: 0px;
   }
   .code-input {
     width: 275px !important;
@@ -84,9 +83,19 @@ const CodeInput = () => {
       });
   }
 
+  async function sendNewCode() {
+    createAccount({
+      phoneNumber: state.userPhoneNumber,
+      location: state.userCountryCode,
+    });
+    setTimeRemaining(30);
+    setError(false);
+    setPassword('');
+  }
+
   return (
     <CodeInputContainer>
-      <h1>Enter your Verification Code</h1>
+      <h2>Enter your Verification Code</h2>
       <p>
         We just sent a verification code to the phone number you gave us. Please
         enter the code below
@@ -107,8 +116,8 @@ const CodeInput = () => {
         <p className={'faded'}>Resend code in {timeRemaining} seconds.</p>
       )}
 
-      <Button onClick={handleSubmit}>
-        {timeRemaining || error ? 'Submit' : 'Resend Code'}
+      <Button onClick={!timeRemaining || error ? sendNewCode : handleSubmit}>
+        {!timeRemaining || error ? 'Resend Code' : 'Submit'}
       </Button>
     </CodeInputContainer>
   );
